@@ -1,15 +1,14 @@
-package com.example.service;
+package com.example.service.inlocalmemory;
 
-import com.example.service.inlocalmemory.WarmestDataStructureServiceInLocalMemory;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TestWarmestDataStructureServiceInLocalMemory {
+class WarmestDataStructureServiceInLocalMemoryTest {
 
     @Test
-    public void testPut() {
+    void testPut() {
         WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // New key returns null
@@ -34,7 +33,7 @@ public class TestWarmestDataStructureServiceInLocalMemory {
     }
 
     @Test
-    public void testGet() {
+    void testGet() {
         WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // Get on empty structure returns null
@@ -62,7 +61,7 @@ public class TestWarmestDataStructureServiceInLocalMemory {
     }
 
     @Test
-    public void testRemove() {
+    void testRemove() {
         WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // Remove on empty structure returns null
@@ -78,7 +77,7 @@ public class TestWarmestDataStructureServiceInLocalMemory {
         // Remove non-existent key returns null
         assertNull(service.remove("z"));
 
-        // Remove head (oldest) node — warmest unchanged
+        // Remove head (oldest) node, warmest unchanged
         service.put("a", 100);
         service.put("b", 200);
         service.put("c", 300);
@@ -86,7 +85,7 @@ public class TestWarmestDataStructureServiceInLocalMemory {
         assertEquals(100, service.remove("a"));
         assertEquals("c", service.getWarmest());
 
-        // Remove warmest — falls back to prev
+        // Remove warmest, falls back to prev
         assertEquals(300, service.remove("c"));
         assertEquals("b", service.getWarmest());
 
@@ -96,47 +95,47 @@ public class TestWarmestDataStructureServiceInLocalMemory {
     }
 
     @Test
-    public void testGetWarmest() {
+    void testGetWarmest() {
         WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // Empty structure
         assertNull(service.getWarmest());
 
-        // After put — warmest is last put key
+        // After put, warmest is last put key
         service.put("a", 100);
         assertEquals("a", service.getWarmest());
         service.put("b", 200);
         assertEquals("b", service.getWarmest());
 
-        // After get — warmest changes to accessed key
+        // After get, warmest changes to accessed key
         service.get("a");
         assertEquals("a", service.getWarmest());
 
-        // After get on already-warmest — no change
+        // After get on already-warmest, no change
         service.get("a");
         assertEquals("a", service.getWarmest());
 
-        // After put on existing key — warmest changes to that key
+        // After put on existing key, warmest changes to that key
         service.put("b", 999);
         assertEquals("b", service.getWarmest());
 
-        // After removing non-warmest — warmest unchanged
+        // After removing non-warmest, warmest unchanged
         service.remove("a");
         assertEquals("b", service.getWarmest());
 
-        // After removing warmest — falls back
+        // After removing warmest, falls back
         service.put("c", 300);
         assertEquals("c", service.getWarmest());
         service.remove("c");
         assertEquals("b", service.getWarmest());
 
-        // After removing all — null
+        // After removing all, null
         service.remove("b");
         assertNull(service.getWarmest());
     }
 
     @Test
-    public void testBasicFlow(){
+    void testBasicFlow() {
         WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         assertNull(service.getWarmest());
@@ -152,9 +151,8 @@ public class TestWarmestDataStructureServiceInLocalMemory {
         assertNull(service.getWarmest());
     }
 
-
     @Test
-    public void testNonBasicFlow(){
+    void testNonBasicFlow() {
         WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         assertNull(service.put("a", 100));
@@ -169,55 +167,34 @@ public class TestWarmestDataStructureServiceInLocalMemory {
     }
 
     @Test
-    public void testFullScenario() {
+    void testFullScenario() {
         WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
-        // 1
         assertNull(service.getWarmest());
-        // 2
         assertNull(service.put("a", 100));
-        // 3
         assertEquals("a", service.getWarmest());
-        // 4
         assertEquals(100, service.put("a", 101));
-        // 5
         assertEquals(101, service.put("a", 101));
-        // 6
         assertEquals(101, service.get("a"));
-        // 7
         assertEquals("a", service.getWarmest());
-        // 8
         assertEquals(101, service.remove("a"));
-        // 9
         assertNull(service.remove("a"));
-        // 10
         assertNull(service.getWarmest());
-        // 11
         assertNull(service.put("a", 100));
-        // 12
         assertNull(service.put("b", 200));
-        // 13
         assertNull(service.put("c", 300));
-        // 14
         assertEquals("c", service.getWarmest());
-        // 15
         assertEquals(200, service.remove("b"));
-        // 16
         assertEquals("c", service.getWarmest());
-        // 17
         assertEquals(300, service.remove("c"));
-        // 18
         assertEquals("a", service.getWarmest());
-        // 19
         assertEquals(100, service.remove("a"));
-        // 20
         assertNull(service.getWarmest());
-        // 21
         assertNull(service.remove("a"));
     }
 
     @Test
-    public void testPromoteMiddleNodeThenRemove() {
+    void testPromoteMiddleNodeThenRemove() {
         WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // List: A <-> B <-> C, warmest = C
