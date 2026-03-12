@@ -22,7 +22,7 @@ public class WarmestDataStructureController {
     @PutMapping("/{key}")
     @Operation(summary = "Put a string key and its associated integer value", description = "Put a string key and its associated integer value into the WarmestDataStructure.")
     public ResponseEntity<Integer> put(@PathVariable String key, @Valid @RequestBody PutRequest putRequest) {
-        Integer prevValue = service.put(key, putRequest.getValue());
+        Integer prevValue = service.put(key, putRequest.value());
         return ResponseEntity.ok(prevValue);
     }
 
