@@ -27,6 +27,8 @@ public class RedisDistributedWarmestStore {
         this.redisScripts = redisScripts;
     }
 
+    // Each mutating operation is delegated to a Redis Lua script so the
+    // value map, linked-list pointers, and warmest key are updated atomically.
     public Integer put(String key, int value) {
         return executeIntegerScript(redisScripts.put(), key, String.valueOf(value));
     }
@@ -39,6 +41,8 @@ public class RedisDistributedWarmestStore {
         return executeIntegerScript(redisScripts.get(), key);
     }
 
+    // getWarmest is a single hash lookup, so it can read directly from Redis
+    // without a Lua script while still preserving the O(1) contract.
     public String getWarmest() {
         Object warmestKey = redisTemplate.opsForHash().get(redisKeys.meta(), redisKeys.warmestField());
         String resolvedWarmest = warmestKey == null ? null : warmestKey.toString();
@@ -46,6 +50,8 @@ public class RedisDistributedWarmestStore {
         return resolvedWarmest;
     }
 
+    // The scripts return Redis strings, so the store converts them back to the
+    // Integer contract expected by WarmestDataStructureInterface.
     private Integer executeIntegerScript(RedisScript<String> script, String key) {
         return parseInteger(redisTemplate.execute(script, redisKeys.all(), key));
     }
@@ -58,3 +64,4 @@ public class RedisDistributedWarmestStore {
         return value == null ? null : Integer.valueOf(value);
     }
 }
+
