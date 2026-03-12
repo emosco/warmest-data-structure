@@ -2,8 +2,6 @@ package com.example.service;
 
 import com.example.api.WarmestDataStructureInterface;
 import com.example.model.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +13,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Profile("inlocalmemory")
 public class WarmestDataStructureServiceInLocalMemory implements WarmestDataStructureInterface {
 
-    private static final Logger logger = LoggerFactory.getLogger(WarmestDataStructureServiceInLocalMemory.class);
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final Map<String, Node> map = new HashMap<>();
     private Node warmest;
@@ -81,7 +78,6 @@ public class WarmestDataStructureServiceInLocalMemory implements WarmestDataStru
     public String getWarmest() {
         readWriteLock.readLock().lock();
         try {
-            logger.info("inside getWarmest!!");
             if (warmest == null){
                 return null;
             }
