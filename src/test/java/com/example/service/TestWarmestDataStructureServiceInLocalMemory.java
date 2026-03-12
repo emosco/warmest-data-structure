@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.service.inlocalmemory.WarmestDataStructureServiceInLocalMemory;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

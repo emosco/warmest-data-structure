@@ -1,7 +1,6 @@
-package com.example.service;
+package com.example.service.distributed;
 
 import com.example.api.WarmestDataStructureInterface;
-import com.example.service.distributed.DistributedWarmestStore;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -9,9 +8,9 @@ import org.springframework.stereotype.Service;
 @Profile("distributed")
 public class WarmestDataStructureServiceDistributed implements WarmestDataStructureInterface {
 
-    private final DistributedWarmestStore distributedWarmestStore;
+    private final RedisDistributedWarmestStore distributedWarmestStore;
 
-    public WarmestDataStructureServiceDistributed(DistributedWarmestStore distributedWarmestStore) {
+    public WarmestDataStructureServiceDistributed(RedisDistributedWarmestStore distributedWarmestStore) {
         this.distributedWarmestStore = distributedWarmestStore;
     }
 

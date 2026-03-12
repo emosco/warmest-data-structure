@@ -1,4 +1,4 @@
-package com.example.service;
+package com.example.service.inlocalmemory;
 
 import com.example.api.WarmestDataStructureInterface;
 import com.example.model.Node;
