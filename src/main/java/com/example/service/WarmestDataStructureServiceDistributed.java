@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.api.WarmestDataStructureInterface;
 import com.example.model.Node;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -9,7 +10,8 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
-public class WarmestDataStructureService implements WarmestDataStructureInterface {
+@Profile("distributed")
+public class WarmestDataStructureServiceDistributed implements WarmestDataStructureInterface {
 
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final Map<String, Node> map = new HashMap<>();

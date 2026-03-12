@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TestWarmestDataStructureService {
+public class TestWarmestDataStructureServiceInLocalMemory {
 
     @Test
     public void testPut() {
-        WarmestDataStructureService service = new WarmestDataStructureService();
+        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // New key returns null
         assertNull(service.put("a", 100));
@@ -34,7 +34,7 @@ public class TestWarmestDataStructureService {
 
     @Test
     public void testGet() {
-        WarmestDataStructureService service = new WarmestDataStructureService();
+        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // Get on empty structure returns null
         assertNull(service.get("a"));
@@ -62,7 +62,7 @@ public class TestWarmestDataStructureService {
 
     @Test
     public void testRemove() {
-        WarmestDataStructureService service = new WarmestDataStructureService();
+        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // Remove on empty structure returns null
         assertNull(service.remove("a"));
@@ -96,7 +96,7 @@ public class TestWarmestDataStructureService {
 
     @Test
     public void testGetWarmest() {
-        WarmestDataStructureService service = new WarmestDataStructureService();
+        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // Empty structure
         assertNull(service.getWarmest());
@@ -136,7 +136,7 @@ public class TestWarmestDataStructureService {
 
     @Test
     public void testBasicFlow(){
-        WarmestDataStructureService service = new WarmestDataStructureService();
+        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         assertNull(service.getWarmest());
 
@@ -154,7 +154,7 @@ public class TestWarmestDataStructureService {
 
     @Test
     public void testNonBasicFlow(){
-        WarmestDataStructureService service = new WarmestDataStructureService();
+        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         assertNull(service.put("a", 100));
         assertNull(service.put("b", 200));
@@ -169,7 +169,7 @@ public class TestWarmestDataStructureService {
 
     @Test
     public void testFullScenario() {
-        WarmestDataStructureService service = new WarmestDataStructureService();
+        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // 1
         assertNull(service.getWarmest());
@@ -217,7 +217,7 @@ public class TestWarmestDataStructureService {
 
     @Test
     public void testPromoteMiddleNodeThenRemove() {
-        WarmestDataStructureService service = new WarmestDataStructureService();
+        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
         // List: A <-> B <-> C, warmest = C
         assertNull(service.put("a", 100));
