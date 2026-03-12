@@ -4,3 +4,56 @@ services:
     container_name: warmest-redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app-8080:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: warmest-app-8080
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: distributed
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+
+  app-8081:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: warmest-app-8081
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: distributed
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SERVER_PORT: 8081
+    ports:
+      - "8081:8081"
+
+  app-8082:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: warmest-app-8082
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: distributed
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SERVER_PORT: 8082
+    ports:
+      - "8082:8082"

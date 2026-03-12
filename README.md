@@ -13,14 +13,55 @@ A key-value store that tracks the **warmest** (most recently accessed) key. Ever
 
 ```bash
 # Local memory (default)
-./mvnw spring-boot:run
+mvn spring-boot:run
 
 # Distributed (requires Redis)
 docker compose up -d
-./mvnw spring-boot:run -Dspring-boot.run.profiles=distributed
+mvn spring-boot:run -Dspring-boot.run.profiles=distributed
 ```
 
 Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+### Run 3 distributed servers locally
+
+The easiest way to run the distributed solution on a Mac is with Docker Compose. The compose file starts:
+
+- one shared Redis instance
+- one Spring Boot app on `8080`
+- one Spring Boot app on `8081`
+- one Spring Boot app on `8082`
+
+Run:
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+- [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- [http://localhost:8081/swagger-ui.html](http://localhost:8081/swagger-ui.html)
+- [http://localhost:8082/swagger-ui.html](http://localhost:8082/swagger-ui.html)
+
+To verify that all three instances share the same Redis-backed state, send a request to one port and read it back from another:
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/warmest/a \
+  -H "Content-Type: application/json" \
+  -d '{"value":100}'
+
+curl http://localhost:8081/api/v1/warmest/a
+curl http://localhost:8082/api/v1/warmest
+```
+
+You can also run the automated smoke test:
+
+```bash
+chmod +x smoke-test-distributed.sh
+./smoke-test-distributed.sh
+```
+
+The script waits for all three instances to become ready, uses unique keys so it does not depend on a clean Redis state, and verifies that reads and warmest updates are shared across ports `8080`, `8081`, and `8082`.
 
 ## API
 
