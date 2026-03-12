@@ -6,65 +6,91 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
 public class WarmestDataStructureService implements WarmestDataStructureInterface {
 
-    private Map<String, Node> map = new HashMap<>();
+    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private final Map<String, Node> map = new HashMap<>();
     private Node warmest;
 
     @Override
     public Integer put(String key, int value) {
-        Node node = map.get(key);
-        if (node == null){
-            Node newNode = new Node(key, value);
-            map.put(key, newNode);
-            setWarmest(newNode);
-            return null;
+        readWriteLock.writeLock().lock();
+        try {
+            Node node = map.get(key);
+            if (node == null) {
+                Node newNode = new Node(key, value);
+                map.put(key, newNode);
+                setWarmest(newNode);
+                return null;
+            }
+            Integer oldValue = node.getValue();
+            node.setValue(value);
+            setWarmest(node);
+            return oldValue;
         }
-        Integer oldValue = node.getValue();
-        node.setValue(value);
-        setWarmest(node);
-        return oldValue;
+        finally {
+            readWriteLock.writeLock().unlock();
+        }
     }
 
     @Override
     public Integer remove(String key) {
-        Node node = map.get(key);
-        if (node == null){
-            return null;
+        readWriteLock.writeLock().lock();
+        try {
+            Node node = map.get(key);
+            if (node == null){
+                return null;
+            }
+            if (node == warmest) {
+                this.warmest = this.warmest.getPrev();
+            }
+            disconnectNode(node);
+            map.remove(key);
+            return node.getValue();
         }
-        if (node.equals(this.warmest)) {
-            this.warmest = this.warmest.getPrev();
+        finally {
+            readWriteLock.writeLock().unlock();
         }
-        disconnectNode(node);
-        map.remove(key);
-        return node.getValue();
     }
 
     @Override
     public Integer get(String key) {
-        Node node = map.get(key);
-        if (node == null) {
-            return null;
+        readWriteLock.writeLock().lock();
+        try {
+            Node node = map.get(key);
+            if (node == null) {
+                return null;
+            }
+            setWarmest(node);
+            return node.getValue();
         }
-        setWarmest(node);
-        return node.getValue();
+        finally {
+            readWriteLock.writeLock().unlock();
+        }
     }
 
     @Override
     public String getWarmest() {
-        if (warmest == null){
-            return null;
+        readWriteLock.readLock().lock();
+        try {
+            if (warmest == null){
+                return null;
+            }
+            return warmest.getKey();
         }
-        return warmest.getKey();
+        finally {
+            readWriteLock.readLock().unlock();
+        }
     }
 
     private void setWarmest(Node node){
         if (this.warmest == null){
             this.warmest = node;
         }
-        else if (node != null && !this.warmest.equals(node)){
+        else if (node != null && this.warmest != node){
             disconnectNode(node);
             this.warmest.setNext(node);
             node.setPrev(this.warmest);
