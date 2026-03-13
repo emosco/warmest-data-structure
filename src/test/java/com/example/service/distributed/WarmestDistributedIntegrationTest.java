@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @ActiveProfiles("distributed")
 @Testcontainers
 class WarmestDistributedIntegrationTest {
+
+    private static final String BASE_PATH = "/api/v1/warmest";
 
     @Container
     static final GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
@@ -53,65 +55,65 @@ class WarmestDistributedIntegrationTest {
     @Test
     void distributedProfileSupportsWarmestFlowThroughRealHttpApi() {
         ResponseEntity<Integer> firstPut = restTemplate.exchange(
-                "/api/v1/warmest/a",
+                BASE_PATH + "/a",
                 HttpMethod.PUT,
                 new HttpEntity<>(Map.of("value", 100)),
                 Integer.class
         );
-        assertEquals(HttpStatusCode.valueOf(201), firstPut.getStatusCode());
+        assertEquals(HttpStatus.CREATED, firstPut.getStatusCode());
         assertNull(firstPut.getBody());
 
         ResponseEntity<Integer> secondPut = restTemplate.exchange(
-                "/api/v1/warmest/b",
+                BASE_PATH + "/b",
                 HttpMethod.PUT,
                 new HttpEntity<>(Map.of("value", 200)),
                 Integer.class
         );
-        assertEquals(HttpStatusCode.valueOf(201), secondPut.getStatusCode());
+        assertEquals(HttpStatus.CREATED, secondPut.getStatusCode());
         assertNull(secondPut.getBody());
 
-        ResponseEntity<String> warmestAfterPut = restTemplate.getForEntity("/api/v1/warmest", String.class);
-        assertEquals(HttpStatusCode.valueOf(200), warmestAfterPut.getStatusCode());
+        ResponseEntity<String> warmestAfterPut = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.OK, warmestAfterPut.getStatusCode());
         assertEquals("b", warmestAfterPut.getBody());
 
-        ResponseEntity<Integer> getA = restTemplate.getForEntity("/api/v1/warmest/a", Integer.class);
-        assertEquals(HttpStatusCode.valueOf(200), getA.getStatusCode());
+        ResponseEntity<Integer> getA = restTemplate.getForEntity(BASE_PATH + "/a", Integer.class);
+        assertEquals(HttpStatus.OK, getA.getStatusCode());
         assertEquals(100, getA.getBody());
 
-        ResponseEntity<String> warmestAfterGet = restTemplate.getForEntity("/api/v1/warmest", String.class);
-        assertEquals(HttpStatusCode.valueOf(200), warmestAfterGet.getStatusCode());
+        ResponseEntity<String> warmestAfterGet = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.OK, warmestAfterGet.getStatusCode());
         assertEquals("a", warmestAfterGet.getBody());
 
         ResponseEntity<Integer> deleteA = restTemplate.exchange(
-                "/api/v1/warmest/a",
+                BASE_PATH + "/a",
                 HttpMethod.DELETE,
                 HttpEntity.EMPTY,
                 Integer.class
         );
-        assertEquals(HttpStatusCode.valueOf(200), deleteA.getStatusCode());
+        assertEquals(HttpStatus.OK, deleteA.getStatusCode());
         assertEquals(100, deleteA.getBody());
 
-        ResponseEntity<String> warmestAfterDelete = restTemplate.getForEntity("/api/v1/warmest", String.class);
-        assertEquals(HttpStatusCode.valueOf(200), warmestAfterDelete.getStatusCode());
+        ResponseEntity<String> warmestAfterDelete = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.OK, warmestAfterDelete.getStatusCode());
         assertEquals("b", warmestAfterDelete.getBody());
     }
 
     @Test
     void distributedProfileReturnsProblemDetailsForValidationAndMissingKeys() {
-        ResponseEntity<Map> missingKey = restTemplate.getForEntity("/api/v1/warmest/missing", Map.class);
-        assertEquals(HttpStatusCode.valueOf(200), missingKey.getStatusCode());
+        ResponseEntity<Map> missingKey = restTemplate.getForEntity(BASE_PATH + "/missing", Map.class);
+        assertEquals(HttpStatus.OK, missingKey.getStatusCode());
         assertNull(missingKey.getBody());
 
         ResponseEntity<Map> invalidPut = restTemplate.exchange(
-                "/api/v1/warmest/a",
+                BASE_PATH + "/a",
                 HttpMethod.PUT,
                 new HttpEntity<>(Map.of()),
                 Map.class
         );
-        assertEquals(HttpStatusCode.valueOf(400), invalidPut.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, invalidPut.getStatusCode());
         assertEquals("Validation error", invalidPut.getBody().get("title"));
-        assertEquals(400, invalidPut.getBody().get("status"));
+        assertEquals(HttpStatus.BAD_REQUEST.value(), invalidPut.getBody().get("status"));
         assertEquals("value: value is required", invalidPut.getBody().get("detail"));
-        assertEquals("/api/v1/warmest/a", invalidPut.getBody().get("path"));
+        assertEquals(BASE_PATH + "/a", invalidPut.getBody().get("path"));
     }
 }
