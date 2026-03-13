@@ -116,4 +116,149 @@ class WarmestDistributedIntegrationTest {
         assertEquals("value: value is required", invalidPut.getBody().get("detail"));
         assertEquals(BASE_PATH + "/a", invalidPut.getBody().get("path"));
     }
+
+    @Test
+    void testFullScenario(){
+        ResponseEntity<String> warmest = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.NOT_FOUND, warmest.getStatusCode());
+
+        ResponseEntity<Integer> putA = restTemplate.exchange(
+                BASE_PATH + "/a",
+                HttpMethod.PUT,
+                new HttpEntity<>(Map.of("value", 100)),
+                Integer.class
+        );
+        assertEquals(HttpStatus.CREATED, putA.getStatusCode());
+        assertNull(putA.getBody());
+
+        warmest = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.OK, warmest.getStatusCode());
+        assertEquals("a", warmest.getBody());
+
+        putA = restTemplate.exchange(
+                BASE_PATH + "/a",
+                HttpMethod.PUT,
+                new HttpEntity<>(Map.of("value", 101)),
+                Integer.class
+        );
+        assertEquals(HttpStatus.OK, putA.getStatusCode());
+        assertEquals(100, putA.getBody());
+
+        putA = restTemplate.exchange(
+                BASE_PATH + "/a",
+                HttpMethod.PUT,
+                new HttpEntity<>(Map.of("value", 101)),
+                Integer.class
+        );
+        assertEquals(HttpStatus.OK, putA.getStatusCode());
+        assertEquals(101, putA.getBody());
+
+        ResponseEntity<Integer> valueA = restTemplate.getForEntity(BASE_PATH + "/a", Integer.class);
+        assertEquals(HttpStatus.OK, valueA.getStatusCode());
+        assertEquals(101, valueA.getBody());
+
+        warmest = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.OK, warmest.getStatusCode());
+        assertEquals("a", warmest.getBody());
+
+        ResponseEntity<Integer> removeA = restTemplate.exchange(
+                BASE_PATH + "/a",
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Integer.class
+        );
+        assertEquals(HttpStatus.OK, removeA.getStatusCode());
+        assertEquals(101, removeA.getBody());
+
+        removeA = restTemplate.exchange(
+                BASE_PATH + "/a",
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Integer.class
+        );
+        assertEquals(HttpStatus.OK, removeA.getStatusCode());
+        assertNull(removeA.getBody());
+
+        warmest = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.NOT_FOUND, warmest.getStatusCode());
+
+        putA = restTemplate.exchange(
+                BASE_PATH + "/a",
+                HttpMethod.PUT,
+                new HttpEntity<>(Map.of("value", 100)),
+                Integer.class
+        );
+        assertEquals(HttpStatus.CREATED, putA.getStatusCode());
+        assertNull(putA.getBody());
+
+        ResponseEntity<Integer> putB = restTemplate.exchange(
+                BASE_PATH + "/b",
+                HttpMethod.PUT,
+                new HttpEntity<>(Map.of("value", 200)),
+                Integer.class
+        );
+        assertEquals(HttpStatus.CREATED, putB.getStatusCode());
+        assertNull(putB.getBody());
+
+        ResponseEntity<Integer> putC = restTemplate.exchange(
+                BASE_PATH + "/c",
+                HttpMethod.PUT,
+                new HttpEntity<>(Map.of("value", 300)),
+                Integer.class
+        );
+        assertEquals(HttpStatus.CREATED, putC.getStatusCode());
+        assertNull(putC.getBody());
+
+        warmest = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.OK, warmest.getStatusCode());
+        assertEquals("c", warmest.getBody());
+
+        ResponseEntity<Integer> removeB = restTemplate.exchange(
+                BASE_PATH + "/b",
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Integer.class
+        );
+        assertEquals(HttpStatus.OK, removeB.getStatusCode());
+        assertEquals(200, removeB.getBody());
+
+        warmest = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.OK, warmest.getStatusCode());
+        assertEquals("c", warmest.getBody());
+
+        ResponseEntity<Integer> removeC = restTemplate.exchange(
+                BASE_PATH + "/c",
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Integer.class
+        );
+        assertEquals(HttpStatus.OK, removeC.getStatusCode());
+        assertEquals(300, removeC.getBody());
+
+        warmest = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.OK, warmest.getStatusCode());
+        assertEquals("a", warmest.getBody());
+
+        removeA = restTemplate.exchange(
+                BASE_PATH + "/a",
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Integer.class
+        );
+        assertEquals(HttpStatus.OK, removeA.getStatusCode());
+        assertEquals(100, removeA.getBody());
+
+        warmest = restTemplate.getForEntity(BASE_PATH, String.class);
+        assertEquals(HttpStatus.NOT_FOUND, warmest.getStatusCode());
+
+        removeA = restTemplate.exchange(
+                BASE_PATH + "/a",
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Integer.class
+        );
+        assertEquals(HttpStatus.OK, removeA.getStatusCode());
+        assertNull(removeA.getBody());
+
+    }
 }

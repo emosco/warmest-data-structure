@@ -139,38 +139,6 @@ class WarmestDataStructureServiceInLocalMemoryTest {
     }
 
     @Test
-    void testBasicFlow() {
-        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
-
-        assertNull(service.getWarmest());
-
-        assertNull(service.put("a", 100));
-        assertEquals("a", service.getWarmest());
-
-        assertEquals(100, service.put("a", 101));
-        assertEquals(101, service.get("a"));
-        assertEquals("a", service.getWarmest());
-
-        assertEquals(101, service.remove("a"));
-        assertNull(service.getWarmest());
-    }
-
-    @Test
-    void testNonBasicFlow() {
-        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
-
-        assertNull(service.put("a", 100));
-        assertNull(service.put("b", 200));
-        assertEquals("b", service.getWarmest());
-        assertEquals(100, service.put("a", 101));
-        assertEquals(101, service.get("a"));
-        assertEquals(200, service.remove("b"));
-        assertEquals("a", service.getWarmest());
-        assertNull(service.put("b", 300));
-        assertEquals("b", service.getWarmest());
-    }
-
-    @Test
     void testFullScenario() {
         WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
 
