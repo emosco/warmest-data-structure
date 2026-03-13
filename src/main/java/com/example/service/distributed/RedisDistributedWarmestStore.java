@@ -30,15 +30,21 @@ public class RedisDistributedWarmestStore {
     // Each mutating operation is delegated to a Redis Lua script so the
     // value map, linked-list pointers, and warmest key are updated atomically.
     public Integer put(String key, int value) {
-        return executeIntegerScript(redisScripts.put(), key, String.valueOf(value));
+        Integer previousValue = executeIntegerScript("put", redisScripts.put(), key, String.valueOf(value));
+        logger.debug("Distributed put completed for key {} with previous value {}", key, previousValue);
+        return previousValue;
     }
 
     public Integer remove(String key) {
-        return executeIntegerScript(redisScripts.remove(), key);
+        Integer removedValue = executeIntegerScript("remove", redisScripts.remove(), key);
+        logger.debug("Distributed remove completed for key {} with previous value {}", key, removedValue);
+        return removedValue;
     }
 
     public Integer get(String key) {
-        return executeIntegerScript(redisScripts.get(), key);
+        Integer resolvedValue = executeIntegerScript("get", redisScripts.get(), key);
+        logger.debug("Distributed get completed for key {} with resolved value {}", key, resolvedValue);
+        return resolvedValue;
     }
 
     // getWarmest is a single hash lookup, so it can read directly from Redis
@@ -52,12 +58,22 @@ public class RedisDistributedWarmestStore {
 
     // The scripts return Redis strings, so the store converts them back to the
     // Integer contract expected by WarmestDataStructureInterface.
-    private Integer executeIntegerScript(RedisScript<String> script, String key) {
-        return parseInteger(redisTemplate.execute(script, redisKeys.all(), key));
+    private Integer executeIntegerScript(String operation, RedisScript<String> script, String key) {
+        try {
+            return parseInteger(redisTemplate.execute(script, redisKeys.all(), key));
+        } catch (RuntimeException ex) {
+            logger.error("Distributed {} failed for key {}", operation, key, ex);
+            throw ex;
+        }
     }
 
-    private Integer executeIntegerScript(RedisScript<String> script, String key, String value) {
-        return parseInteger(redisTemplate.execute(script, redisKeys.all(), key, value));
+    private Integer executeIntegerScript(String operation, RedisScript<String> script, String key, String value) {
+        try {
+            return parseInteger(redisTemplate.execute(script, redisKeys.all(), key, value));
+        } catch (RuntimeException ex) {
+            logger.error("Distributed {} failed for key {}", operation, key, ex);
+            throw ex;
+        }
     }
 
     private Integer parseInteger(String value) {

@@ -88,7 +88,7 @@ wait_for_server "$BASE_8082"
 echo "Using test keys: ${KEY_A}, ${KEY_B}"
 
 request PUT "${BASE_8080}/api/v1/warmest/${KEY_A}" '{"value":100}'
-assert_status "200" "PUT ${KEY_A} on 8080"
+assert_status "201" "PUT ${KEY_A} on 8080"
 
 request GET "${BASE_8081}/api/v1/warmest/${KEY_A}"
 assert_status "200" "GET ${KEY_A} on 8081"
@@ -99,7 +99,7 @@ assert_status "200" "GET warmest on 8082 after reading ${KEY_A}"
 assert_body "${KEY_A}" "Warmest should be ${KEY_A} on 8082"
 
 request PUT "${BASE_8081}/api/v1/warmest/${KEY_B}" '{"value":200}'
-assert_status "200" "PUT ${KEY_B} on 8081"
+assert_status "201" "PUT ${KEY_B} on 8081"
 
 request GET "${BASE_8080}/api/v1/warmest"
 assert_status "200" "GET warmest on 8080 after writing ${KEY_B}"
