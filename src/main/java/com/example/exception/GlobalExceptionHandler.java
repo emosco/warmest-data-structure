@@ -11,16 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(KeyNotFoundException.class)
-    public ProblemDetail handleKeyNotFound(KeyNotFoundException ex, HttpServletRequest request) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.NOT_FOUND,
-                ex.getMessage()
-        );
-        problem.setTitle("Key not found");
-        problem.setProperty("path", request.getRequestURI());
-        return problem;
-    }
 
     @ExceptionHandler(WarmestNotFoundException.class)
     public ProblemDetail handleWarmestNotFound(WarmestNotFoundException ex, HttpServletRequest request) {

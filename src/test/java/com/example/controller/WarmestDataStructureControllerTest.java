@@ -69,11 +69,8 @@ class WarmestDataStructureControllerTest {
         when(service.get("missing")).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/warmest/missing"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.title").value("Key not found"))
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.detail").value("Key not found: missing"))
-                .andExpect(jsonPath("$.path").value("/api/v1/warmest/missing"));
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
     }
 
     @Test
@@ -90,11 +87,8 @@ class WarmestDataStructureControllerTest {
         when(service.remove("missing")).thenReturn(null);
 
         mockMvc.perform(delete("/api/v1/warmest/missing"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.title").value("Key not found"))
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.detail").value("Key not found: missing"))
-                .andExpect(jsonPath("$.path").value("/api/v1/warmest/missing"));
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
     }
 
     @Test

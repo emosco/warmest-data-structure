@@ -2,10 +2,10 @@ package com.example.controller;
 
 import com.example.api.WarmestDataStructureInterface;
 import com.example.dto.PutRequest;
-import com.example.exception.KeyNotFoundException;
 import com.example.exception.WarmestNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +23,9 @@ public class WarmestDataStructureController {
     @Operation(summary = "Put a string key and its associated integer value", description = "Put a string key and its associated integer value into the WarmestDataStructure.")
     public ResponseEntity<Integer> put(@PathVariable String key, @Valid @RequestBody PutRequest putRequest) {
         Integer prevValue = service.put(key, putRequest.value());
+        if (prevValue == null){
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        }
         return ResponseEntity.ok(prevValue);
     }
 
@@ -30,9 +33,6 @@ public class WarmestDataStructureController {
     @Operation(summary = "Deletes a string key and its associated integer value", description = "Deletes a string key and its associated integer value from the WarmestDataStructure.")
     public ResponseEntity<Integer> delete(@PathVariable String key) {
         Integer prevValue = service.remove(key);
-        if (prevValue == null) {
-            throw new KeyNotFoundException(key);
-        }
         return ResponseEntity.ok(prevValue);
     }
 
@@ -40,9 +40,6 @@ public class WarmestDataStructureController {
     @Operation(summary = "Gets the associated integer value of the input param key", description = "Gets the associated integer value of the input param key from the WarmestDataStructure.")
     public ResponseEntity<Integer> get(@PathVariable String key) {
         Integer value = service.get(key);
-        if (value == null) {
-            throw new KeyNotFoundException(key);
-        }
         return ResponseEntity.ok(value);
     }
 

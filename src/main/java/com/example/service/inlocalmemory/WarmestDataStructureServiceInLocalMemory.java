@@ -22,12 +22,14 @@ public class WarmestDataStructureServiceInLocalMemory implements WarmestDataStru
         readWriteLock.writeLock().lock();
         try {
             Node node = map.get(key);
+            //create new
             if (node == null) {
                 Node newNode = new Node(key, value);
                 map.put(key, newNode);
                 setWarmest(newNode);
                 return null;
             }
+            //updating existing
             Integer oldValue = node.getValue();
             node.setValue(value);
             setWarmest(node);
@@ -105,10 +107,10 @@ public class WarmestDataStructureServiceInLocalMemory implements WarmestDataStru
             Node prev = node.getPrev();
             Node next = node.getNext();
             if (prev != null) {
-                prev.setNext(node.getNext());
+                prev.setNext(next);
             }
             if (next != null) {
-                next.setPrev(node.getPrev());
+                next.setPrev(prev);
             }
             node.setPrev(null);
             node.setNext(null);

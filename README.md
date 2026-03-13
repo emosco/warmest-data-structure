@@ -122,6 +122,24 @@ In the distributed implementation:
 
 The distributed implementation preserves the same asymptotic complexity as the local in-memory implementation while allowing multiple application instances to share the same data structure.
 
+## Concurrency And Thread Safety
+
+The project handles concurrency differently in the two runtime profiles.
+
+In the `inlocalmemory` profile, the shared `HashMap`, doubly-linked list, and `warmest` pointer are protected with a `ReentrantReadWriteLock`:
+
+- `put`, `get`, and `remove` acquire the write lock because they can all change recency order
+- `getWarmest()` acquires the read lock because it only reads the current warmest key
+
+This keeps the single-instance in-memory implementation thread-safe inside one JVM.
+
+In the `distributed` profile, thread safety is handled at the Redis layer:
+
+- `put`, `get`, and `remove` use Lua scripts so each multi-step mutation is executed atomically on Redis
+- `getWarmest()` is a single Redis hash read, so it does not require a Lua script
+
+This means multiple application instances can safely share the same logical data structure without relying on JVM-local locks.
+
 
 ## Testing Strategy
 

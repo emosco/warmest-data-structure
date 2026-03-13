@@ -1,14 +1,13 @@
 package com.example.model;
 
-import lombok.Data;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 public class Node {
 
-    private String key;
-    private Integer value;
+    private final String key;
+    private int value;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -18,7 +17,7 @@ public class Node {
     @EqualsAndHashCode.Exclude
     private Node next;
 
-    public Node(String key, Integer value){
+    public Node(String key, int value){
         this.key = key;
         this.value = value;
     }

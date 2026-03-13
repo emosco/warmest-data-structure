@@ -58,7 +58,7 @@ class WarmestDistributedIntegrationTest {
                 new HttpEntity<>(Map.of("value", 100)),
                 Integer.class
         );
-        assertEquals(HttpStatusCode.valueOf(200), firstPut.getStatusCode());
+        assertEquals(HttpStatusCode.valueOf(201), firstPut.getStatusCode());
         assertNull(firstPut.getBody());
 
         ResponseEntity<Integer> secondPut = restTemplate.exchange(
@@ -67,7 +67,7 @@ class WarmestDistributedIntegrationTest {
                 new HttpEntity<>(Map.of("value", 200)),
                 Integer.class
         );
-        assertEquals(HttpStatusCode.valueOf(200), secondPut.getStatusCode());
+        assertEquals(HttpStatusCode.valueOf(201), secondPut.getStatusCode());
         assertNull(secondPut.getBody());
 
         ResponseEntity<String> warmestAfterPut = restTemplate.getForEntity("/api/v1/warmest", String.class);
@@ -99,11 +99,8 @@ class WarmestDistributedIntegrationTest {
     @Test
     void distributedProfileReturnsProblemDetailsForValidationAndMissingKeys() {
         ResponseEntity<Map> missingKey = restTemplate.getForEntity("/api/v1/warmest/missing", Map.class);
-        assertEquals(HttpStatusCode.valueOf(404), missingKey.getStatusCode());
-        assertEquals("Key not found", missingKey.getBody().get("title"));
-        assertEquals(404, missingKey.getBody().get("status"));
-        assertEquals("Key not found: missing", missingKey.getBody().get("detail"));
-        assertEquals("/api/v1/warmest/missing", missingKey.getBody().get("path"));
+        assertEquals(HttpStatusCode.valueOf(200), missingKey.getStatusCode());
+        assertNull(missingKey.getBody());
 
         ResponseEntity<Map> invalidPut = restTemplate.exchange(
                 "/api/v1/warmest/a",
