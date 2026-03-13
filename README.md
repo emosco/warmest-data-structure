@@ -152,3 +152,7 @@ The project uses a layered testing approach:
 
 This keeps most tests fast while still covering the real distributed behavior end to end.
 
+## Future Improvements
+
+- Add Spring Boot Actuator for better operational visibility in `distributed` mode. Exposing `/actuator/health` would make it easy to verify that an application instance is up and can still reach Redis.
+

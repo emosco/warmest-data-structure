@@ -2,10 +2,14 @@ package com.example.service.inlocalmemory;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import java.util.concurrent.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class WarmestDataStructureServiceInLocalMemoryTest {
+
+    // This test class constructs the service directly because it is a focused
+    // unit test for data-structure behavior and does not need Spring Boot wiring.
 
     @Test
     void testPut() {
@@ -218,5 +222,73 @@ class WarmestDataStructureServiceInLocalMemoryTest {
         // Remove A, warmest should be null
         assertEquals(100, service.remove("a"));
         assertNull(service.getWarmest());
+    }
+
+
+    @Test
+    void testConcurrentAccess() throws Exception {
+        WarmestDataStructureServiceInLocalMemory service = new WarmestDataStructureServiceInLocalMemory();
+
+        service.put("a", 100);
+        service.put("b", 200);
+        service.put("c", 300);
+
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+
+        try {
+            Future<Integer> getA = executorService.submit(() -> {
+                start.await();
+                return service.get("a");
+            });
+
+            Future<Integer> removeA = executorService.submit(() -> {
+                start.await();
+                return service.remove("a");
+            });
+
+            Future<Integer> putB = executorService.submit(() -> {
+                start.await();
+                return service.put("b", 201);
+            });
+
+            Future<String> getWarmest = executorService.submit(() -> {
+                start.await();
+                return service.getWarmest();
+            });
+
+            start.countDown();
+
+            Integer getAResult = getA.get();
+            Integer removeAResult = removeA.get();
+            Integer putBResult = putB.get();
+            String getWarmestResult = getWarmest.get();
+
+            // Allowed outcomes from the concurrent phase
+            assertTrue(getAResult == null || getAResult == 100);
+            assertTrue(removeAResult == null || removeAResult == 100);
+            assertEquals(200, (int) putBResult);
+            assertTrue(getWarmestResult.equals("a")
+                    || getWarmestResult.equals("b")
+                    || getWarmestResult.equals("c"));
+
+            // Inspect the final state produced by the concurrent tasks
+            String finalWarmest = service.getWarmest();
+            assertTrue(finalWarmest == null
+                    || finalWarmest.equals("b")
+                    || finalWarmest.equals("c"));
+
+            // Service should still be coherent after concurrent access
+            assertNull(service.get("a"));
+            assertEquals(201, service.get("b"));
+            assertEquals(300, service.get("c"));
+
+            // The previous line promoted c to warmest
+            assertEquals("c", service.getWarmest());
+        }
+        finally {
+            executorService.shutdown();
+            assertTrue(executorService.awaitTermination(5, TimeUnit.SECONDS));
+        }
     }
 }

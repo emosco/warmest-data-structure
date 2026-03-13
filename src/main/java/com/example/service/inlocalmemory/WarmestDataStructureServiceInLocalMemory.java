@@ -96,8 +96,8 @@ public class WarmestDataStructureServiceInLocalMemory implements WarmestDataStru
         }
         else if (node != null && this.warmest != node){
             disconnectNode(node);
-            this.warmest.setNext(node);
             node.setPrev(this.warmest);
+            this.warmest.setNext(node);
             this.warmest = node;
         }
     }

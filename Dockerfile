@@ -13,6 +13,6 @@ WORKDIR /app
 
 COPY --from=build /app/target/warmest-data-structure-1.0-SNAPSHOT.jar app.jar
 
-EXPOSE 8080 8081 8082
+EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

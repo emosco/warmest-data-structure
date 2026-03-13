@@ -1,3 +1,9 @@
+-- Maintenance note:
+-- disconnectNode() must stay identical across put.lua, get.lua, and remove.lua.
+-- setWarmest() must stay identical across put.lua and get.lua.
+-- Redis Lua has no built-in import/include across separate script files, so
+-- these shared helpers are duplicated and must be kept in sync manually.
+--
 -- Helper functions
 local function disconnectNode(nodeKey)
     local prevKey = redis.call('HGET', KEYS[2], nodeKey)
