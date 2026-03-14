@@ -141,6 +141,14 @@ In the `distributed` profile, thread safety is handled at the Redis layer:
 This means multiple application instances can safely share the same logical data structure without relying on JVM-local locks.
 
 
+## Design Decisions
+
+- **Redis for shared state** -- Redis hashes (`HGET`/`HSET`/`HDEL`) are O(1), which maps directly to the data structure's complexity requirements. Redis also supports Lua scripting for server-side atomicity, removing the need for distributed locks or two-phase commits.
+- **Lua scripts for atomicity** -- each mutating operation (`put`, `get`, `remove`) touches multiple Redis hashes (values, prev, next, meta). Wrapping each operation in a Lua script guarantees it executes as a single atomic unit on the Redis server, preventing race conditions between application instances.
+- **Spring profiles for swappable implementations** -- `inlocalmemory` and `distributed` profiles allow the same controller and interface to work with either backend. The switch is a configuration change, not a code change.
+- **`HashMap` + doubly-linked list** -- the in-memory implementation mirrors the classic LRU cache pattern: a hash map for O(1) key lookup and a linked list for O(1) recency tracking. The `warmest` pointer always points to the tail (most recent) node.
+- **`getWarmest()` returns 404 when empty** -- the service returns `null` as the interface specifies, but the controller translates that to a 404 because a `GET /warmest` with no warmest entity is semantically "resource not found." This differs from `GET /{key}` returning 200 with a null body, where the lookup operation itself succeeded.
+
 ## Testing Strategy
 
 The project uses a layered testing approach:
