@@ -27,9 +27,9 @@ public class WarmestDataStructureApplication {
 
         if (Arrays.asList(effectiveProfiles).contains("distributed")) {
             logger.info(
-                    "Distributed mode is configured to use Redis at {}:{}",
+                    "Distributed mode is configured to use Redis at {}:{} ",
                     environment.getProperty("spring.data.redis.host"),
-                    environment.getProperty("spring.data.redis.port ")
+                    environment.getProperty("spring.data.redis.port")
             );
         }
     }
